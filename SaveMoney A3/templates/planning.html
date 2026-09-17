@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Planejamento — SaveMoney{% endblock %}
+{% block page_title %}Planejamento Mensal{% endblock %}
+
+{% block content %}
+
+{% if ultrapassou %}
+<div class="alert-box alert-warning">
+  ⚠️ Atenção! Você ultrapassou o limite de gastos definido para este mês.
+</div>
+{% endif %}
+
+<div class="planning-grid">
+  <div class="stat-card">
+    <div class="label">Receita prevista</div>
+    <div class="value positive">R$ {{ "%.2f"|format(plano.expected_income)|replace('.', ',') }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="label">Despesas previstas</div>
+    <div class="value negative">R$ {{ "%.2f"|format(plano.expected_expense)|replace('.', ',') }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="label">Valor disponível (previsto)</div>
+    <div class="value {{ 'positive' if disponivel_previsto >= 0 else 'negative' }}">R$ {{ "%.2f"|format(disponivel_previsto)|replace('.', ',') }}</div>
+  </div>
+</div>
+
+<div class="planning-grid">
+  <div class="stat-card">
+    <div class="label">Limite mensal de gastos</div>
+    <div class="value">R$ {{ "%.2f"|format(plano.monthly_limit)|replace('.', ',') }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="label">Gasto atual do mês</div>
+    <div class="value negative">R$ {{ "%.2f"|format(gasto_atual)|replace('.', ',') }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="label">Disponível dentro do limite</div>
+    <div class="value {{ 'positive' if disponivel_limite >= 0 else 'negative' }}">R$ {{ "%.2f"|format(disponivel_limite)|replace('.', ',') }}</div>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="panel-header"><h2>Definir planejamento</h2></div>
+  <form method="POST" action="{{ url_for('planning.index') }}">
+    <div class="form-row">
+      <div class="form-group">
+        <label>Receita prevista (R$)</label>
+        <input type="text" name="expected_income" class="form-control" value="{{ plano.expected_income }}" required>
+      </div>
+      <div class="form-group">
+        <label>Despesas previstas (R$)</label>
+        <input type="text" name="expected_expense" class="form-control" value="{{ plano.expected_expense }}" required>
+      </div>
+      <div class="form-group">
+        <label>Limite mensal de gastos (R$)</label>
+        <input type="text" name="monthly_limit" class="form-control" value="{{ plano.monthly_limit }}" required>
+      </div>
+    </div>
+    <button type="submit" class="btn btn-primary">Salvar planejamento</button>
+  </form>
+</div>
+
+{% endblock %}

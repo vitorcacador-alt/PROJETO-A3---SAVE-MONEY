@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+{% block title %}Metas — SaveMoney{% endblock %}
+{% block page_title %}Metas Financeiras{% endblock %}
+
+{% block content %}
+
+<div class="panel">
+  <div class="panel-header"><h2>Nova meta</h2></div>
+  <form method="POST" action="{{ url_for('goals.nova') }}">
+    <div class="form-row">
+      <div class="form-group" style="flex:2;">
+        <label>Nome da meta</label>
+        <input type="text" name="name" class="form-control" placeholder="Ex: Comprar um computador" required>
+      </div>
+      <div class="form-group">
+        <label>Valor desejado (R$)</label>
+        <input type="text" name="target_amount" class="form-control" placeholder="5000,00" required>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Valor já economizado (R$)</label>
+        <input type="text" name="current_amount" class="form-control" placeholder="0,00">
+      </div>
+      <div class="form-group">
+        <label>Data limite</label>
+        <input type="date" name="deadline" class="form-control">
+      </div>
+    </div>
+    <button type="submit" class="btn btn-primary">+ Criar meta</button>
+  </form>
+</div>
+
+<div class="panel">
+  <div class="panel-header"><h2>Minhas metas</h2></div>
+
+  {% if metas %}
+  <div class="goals-grid">
+    {% for m in metas %}
+    <div class="goal-card">
+      <h3>{{ m.name }}</h3>
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" style="width: {{ m.progress }}%;"></div>
+      </div>
+      <div class="goal-values">
+        <span>R$ {{ "%.2f"|format(m.current_amount)|replace('.', ',') }}</span>
+        <span>{{ m.progress }}%</span>
+        <span>R$ {{ "%.2f"|format(m.target_amount)|replace('.', ',') }}</span>
+      </div>
+      {% if m.deadline %}
+        <div class="goal-deadline">Prazo: {{ m.deadline.strftime('%d/%m/%Y') }}</div>
+      {% endif %}
+      <div class="goal-actions">
+        <button class="btn btn-secondary btn-sm" onclick='abrirEdicaoMeta({{ m.id }}, {{ m.name|tojson }}, {{ m.target_amount }}, {{ m.current_amount }}, "{{ m.deadline.strftime('%Y-%m-%d') if m.deadline else '' }}")'>Editar</button>
+        <form method="POST" action="{{ url_for('goals.excluir', id=m.id) }}" onsubmit="return confirmarExclusao(this, 'Tem certeza que deseja excluir esta meta?');">
+          <button type="submit" class="btn btn-danger btn-sm">Excluir</button>
+        </form>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty-state">Você ainda não criou nenhuma meta financeira.</div>
+  {% endif %}
+</div>
+
+<!-- Modal de edição -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal-box" style="max-width: 420px;">
+    <h3>Editar meta</h3>
+    <form method="POST" id="editForm">
+      <div class="form-group">
+        <label>Nome da meta</label>
+        <input type="text" name="name" id="edit_name" class="form-control" required>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Valor desejado (R$)</label>
+          <input type="text" name="target_amount" id="edit_target" class="form-control" required>
+        </div>
+        <div class="form-group">
+          <label>Valor economizado (R$)</label>
+          <input type="text" name="current_amount" id="edit_current" class="form-control">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Data limite</label>
+        <input type="date" name="deadline" id="edit_deadline" class="form-control">
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" onclick="fecharModalEdicao()">Cancelar</button>
+        <button type="submit" class="btn btn-primary">Salvar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+function abrirEdicaoMeta(id, nome, meta, atual, prazo) {
+  document.getElementById("editForm").action = "/metas/editar/" + id;
+  document.getElementById("edit_name").value = nome;
+  document.getElementById("edit_target").value = meta;
+  document.getElementById("edit_current").value = atual;
+  document.getElementById("edit_deadline").value = prazo;
+  document.getElementById("editModal").classList.add("active");
+}
+function fecharModalEdicao() {
+  document.getElementById("editModal").classList.remove("active");
+}
+</script>
+{% endblock %}

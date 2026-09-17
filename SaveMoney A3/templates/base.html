@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}SaveMoney{% endblock %}</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<script>
+  // Aplica o tema salvo antes de renderizar, para evitar "flash" de tema errado
+  (function() {
+    const tema = localStorage.getItem("savemoney_theme") || "light";
+    document.documentElement.setAttribute("data-theme", tema);
+  })();
+</script>
+</head>
+<body>
+
+<div class="flash-container">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="flash flash-{{ category }}">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+</div>
+
+<div class="app-layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="logo">💰 SaveMoney</div>
+    <ul class="sidebar-menu">
+      <li><a href="{{ url_for('dashboard.index') }}" class="{{ 'active' if request.endpoint == 'dashboard.index' }}">🏠 Dashboard</a></li>
+      <li><a href="{{ url_for('transactions.receitas') }}" class="{{ 'active' if request.endpoint == 'transactions.receitas' }}">💰 Receitas</a></li>
+      <li><a href="{{ url_for('transactions.despesas') }}" class="{{ 'active' if request.endpoint == 'transactions.despesas' }}">💸 Despesas</a></li>
+      <li><a href="{{ url_for('transactions.historico') }}" class="{{ 'active' if request.endpoint == 'transactions.historico' }}">📋 Transações</a></li>
+      <li><a href="{{ url_for('categories.index') }}" class="{{ 'active' if request.endpoint == 'categories.index' }}">🏷️ Categorias</a></li>
+      <li><a href="{{ url_for('goals.index') }}" class="{{ 'active' if request.endpoint == 'goals.index' }}">🎯 Metas</a></li>
+      <li><a href="{{ url_for('planning.index') }}" class="{{ 'active' if request.endpoint == 'planning.index' }}">📊 Planejamento</a></li>
+      <li><a href="{{ url_for('profile.index') }}" class="{{ 'active' if request.endpoint == 'profile.index' }}">⚙️ Perfil</a></li>
+    </ul>
+    <div class="sidebar-footer">
+      <a href="{{ url_for('auth.logout') }}" class="btn btn-secondary btn-block btn-sm">🚪 Sair</a>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <div class="topbar">
+      <div style="display:flex; align-items:center; gap:12px;">
+        <button class="hamburger" onclick="alternarMenu()">☰</button>
+        <h1>{% block page_title %}{% endblock %}</h1>
+      </div>
+      <div class="topbar-actions">
+        <span style="color: var(--text-muted); font-size: 0.85rem;">Olá, {{ current_user.name.split(' ')[0] if current_user.is_authenticated else '' }}</span>
+        <button class="theme-toggle" id="themeToggleBtn" onclick="alternarTema()">🌙 Escuro</button>
+      </div>
+    </div>
+
+    {% block content %}{% endblock %}
+  </main>
+</div>
+
+<!-- Modal de confirmação de exclusão -->
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal-box">
+    <h3>Confirmar exclusão</h3>
+    <p id="confirmModalText" style="color: var(--text-muted);">Tem certeza que deseja excluir este item?</p>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="fecharModalConfirmacao()">Cancelar</button>
+      <button class="btn btn-danger" onclick="confirmarExclusaoFinal()">Excluir</button>
+    </div>
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

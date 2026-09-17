@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Perfil — SaveMoney{% endblock %}
+{% block page_title %}Meu Perfil{% endblock %}
+
+{% block content %}
+
+<div class="panel">
+  <div class="panel-header"><h2>Dados da conta</h2></div>
+  <form method="POST" action="{{ url_for('profile.index') }}">
+    <input type="hidden" name="acao" value="dados">
+    <div class="form-row">
+      <div class="form-group">
+        <label>Nome</label>
+        <input type="text" name="name" class="form-control" value="{{ current_user.name }}" required>
+      </div>
+      <div class="form-group">
+        <label>E-mail</label>
+        <input type="email" class="form-control" value="{{ current_user.email }}" disabled>
+      </div>
+    </div>
+    <button type="submit" class="btn btn-primary">Salvar alterações</button>
+  </form>
+</div>
+
+<div class="panel">
+  <div class="panel-header"><h2>Alterar senha</h2></div>
+  <form method="POST" action="{{ url_for('profile.index') }}">
+    <input type="hidden" name="acao" value="senha">
+    <div class="form-row">
+      <div class="form-group">
+        <label>Senha atual</label>
+        <input type="password" name="current_password" class="form-control" required>
+      </div>
+      <div class="form-group">
+        <label>Nova senha</label>
+        <input type="password" name="new_password" class="form-control" minlength="6" required>
+      </div>
+      <div class="form-group">
+        <label>Confirmar nova senha</label>
+        <input type="password" name="confirm_password" class="form-control" minlength="6" required>
+      </div>
+    </div>
+    <button type="submit" class="btn btn-primary">Alterar senha</button>
+  </form>
+</div>
+
+<div class="panel">
+  <div class="panel-header"><h2>Sessão</h2></div>
+  <a href="{{ url_for('auth.logout') }}" class="btn btn-danger">🚪 Sair da conta</a>
+</div>
+
+{% endblock %}

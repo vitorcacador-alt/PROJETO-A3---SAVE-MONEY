@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+{% block title %}Despesas — SaveMoney{% endblock %}
+{% block page_title %}Despesas{% endblock %}
+
+{% block content %}
+
+<div class="panel">
+  <div class="panel-header">
+    <h2>Nova despesa</h2>
+  </div>
+  <form method="POST" action="{{ url_for('transactions.nova_despesa') }}">
+    <div class="form-row">
+      <div class="form-group" style="flex:2;">
+        <label>Descrição</label>
+        <input type="text" name="description" class="form-control" required>
+      </div>
+      <div class="form-group">
+        <label>Valor (R$)</label>
+        <input type="text" name="amount" class="form-control" placeholder="0,00" required>
+      </div>
+      <div class="form-group">
+        <label>Data</label>
+        <input type="date" name="date" class="form-control" required>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Categoria</label>
+        <select name="category" class="form-control">
+          {% for c in categorias %}
+            <option value="{{ c.name }}">{{ c.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Forma de pagamento</label>
+        <input type="text" name="payment_method" class="form-control" placeholder="Ex: Cartão, Pix, Dinheiro...">
+      </div>
+      <div class="form-group" style="flex:2;">
+        <label>Observação</label>
+        <input type="text" name="observation" class="form-control" placeholder="Opcional">
+      </div>
+    </div>
+    <button type="submit" class="btn btn-primary">+ Adicionar despesa</button>
+  </form>
+</div>
+
+<div class="panel">
+  <div class="panel-header">
+    <h2>Minhas despesas</h2>
+  </div>
+
+  <form method="GET" class="filters-bar">
+    <input type="text" name="busca" class="form-control" placeholder="Pesquisar descrição..." value="{{ filtros.busca }}">
+    <input type="date" name="data_inicio" class="form-control" value="{{ filtros.data_inicio }}">
+    <input type="date" name="data_fim" class="form-control" value="{{ filtros.data_fim }}">
+    <select name="categoria" class="form-control">
+      <option value="">Todas as categorias</option>
+      {% for c in categorias %}
+        <option value="{{ c.name }}" {{ 'selected' if filtros.categoria == c.name }}>{{ c.name }}</option>
+      {% endfor %}
+    </select>
+    <button type="submit" class="btn btn-secondary">Filtrar</button>
+    <a href="{{ url_for('transactions.despesas') }}" class="btn btn-secondary">Limpar</a>
+  </form>
+
+  <div class="table-wrapper">
+    {% if itens %}
+    <table>
+      <thead>
+        <tr><th>Data</th><th>Descrição</th><th>Categoria</th><th>Forma</th><th>Valor</th><th>Ações</th></tr>
+      </thead>
+      <tbody>
+        {% for t in itens %}
+        <tr>
+          <td>{{ t.date.strftime('%d/%m/%Y') }}</td>
+          <td>{{ t.description }}{% if t.is_demo %} <span class="badge badge-despesa">demo</span>{% endif %}</td>
+          <td>{{ t.category or '-' }}</td>
+          <td>{{ t.payment_method or '-' }}</td>
+          <td class="amount-despesa">R$ {{ "%.2f"|format(t.amount)|replace('.', ',') }}</td>
+          <td class="actions-cell">
+            <button class="icon-btn edit" onclick='abrirEdicaoDespesa({{ t.id }}, {{ t.description|tojson }}, {{ t.amount }}, {{ t.category|tojson }}, "{{ t.date.strftime('%Y-%m-%d') }}", {{ (t.payment_method or "")|tojson }}, {{ (t.observation or "")|tojson }})'>✏️</button>
+            <form method="POST" action="{{ url_for('transactions.excluir_despesa', id=t.id) }}" onsubmit="return confirmarExclusao(this, 'Tem certeza que deseja excluir esta despesa?');">
+              <button type="submit" class="icon-btn danger">🗑️</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">Nenhuma despesa cadastrada ainda. Adicione sua primeira despesa acima!</div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Modal de edição -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal-box" style="max-width: 480px;">
+    <h3>Editar despesa</h3>
+    <form method="POST" id="editForm">
+      <div class="form-group">
+        <label>Descrição</label>
+        <input type="text" name="description" id="edit_description" class="form-control" required>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Valor (R$)</label>
+          <input type="text" name="amount" id="edit_amount" class="form-control" required>
+        </div>
+        <div class="form-group">
+          <label>Data</label>
+          <input type="date" name="date" id="edit_date" class="form-control" required>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Categoria</label>
+        <select name="category" id="edit_category" class="form-control">
+          {% for c in categorias %}
+            <option value="{{ c.name }}">{{ c.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Forma de pagamento</label>
+        <input type="text" name="payment_method" id="edit_payment_method" class="form-control">
+      </div>
+      <div class="form-group">
+        <label>Observação</label>
+        <input type="text" name="observation" id="edit_observation" class="form-control">
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" onclick="fecharModalEdicao()">Cancelar</button>
+        <button type="submit" class="btn btn-primary">Salvar alterações</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+function abrirEdicaoDespesa(id, descricao, valor, categoria, data, forma, observacao) {
+  document.getElementById("editForm").action = "/despesas/editar/" + id;
+  document.getElementById("edit_description").value = descricao;
+  document.getElementById("edit_amount").value = valor;
+  document.getElementById("edit_date").value = data;
+  document.getElementById("edit_category").value = categoria;
+  document.getElementById("edit_payment_method").value = forma;
+  document.getElementById("edit_observation").value = observacao;
+  document.getElementById("editModal").classList.add("active");
+}
+function fecharModalEdicao() {
+  document.getElementById("editModal").classList.remove("active");
+}
+</script>
+{% endblock %}

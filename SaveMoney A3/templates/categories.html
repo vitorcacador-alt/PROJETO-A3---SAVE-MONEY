@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Categorias — SaveMoney{% endblock %}
+{% block page_title %}Categorias{% endblock %}
+
+{% block content %}
+
+<div class="panel">
+  <div class="panel-header"><h2>Nova categoria</h2></div>
+  <form method="POST" action="{{ url_for('categories.nova') }}">
+    <div class="form-row">
+      <div class="form-group" style="flex:2;">
+        <label>Nome</label>
+        <input type="text" name="name" class="form-control" required>
+      </div>
+      <div class="form-group">
+        <label>Tipo</label>
+        <select name="type" class="form-control">
+          <option value="receita">Receita</option>
+          <option value="despesa">Despesa</option>
+        </select>
+      </div>
+    </div>
+    <button type="submit" class="btn btn-primary">+ Adicionar categoria</button>
+  </form>
+</div>
+
+<div class="categories-columns">
+  <div class="panel">
+    <div class="panel-header"><h2>Categorias de Receita</h2></div>
+    {% if receitas %}
+      {% for c in receitas %}
+      <div class="category-item">
+        <form method="POST" action="{{ url_for('categories.editar', id=c.id) }}" style="display:flex; gap:8px; flex:1;">
+          <input type="text" name="name" value="{{ c.name }}" class="form-control" style="padding:5px 8px;">
+          <button type="submit" class="icon-btn edit">💾</button>
+        </form>
+        <form method="POST" action="{{ url_for('categories.excluir', id=c.id) }}" onsubmit="return confirmarExclusao(this, 'Excluir a categoria {{ c.name }}?');">
+          <button type="submit" class="icon-btn danger">🗑️</button>
+        </form>
+      </div>
+      {% endfor %}
+    {% else %}
+      <div class="empty-state">Nenhuma categoria de receita.</div>
+    {% endif %}
+  </div>
+
+  <div class="panel">
+    <div class="panel-header"><h2>Categorias de Despesa</h2></div>
+    {% if despesas %}
+      {% for c in despesas %}
+      <div class="category-item">
+        <form method="POST" action="{{ url_for('categories.editar', id=c.id) }}" style="display:flex; gap:8px; flex:1;">
+          <input type="text" name="name" value="{{ c.name }}" class="form-control" style="padding:5px 8px;">
+          <button type="submit" class="icon-btn edit">💾</button>
+        </form>
+        <form method="POST" action="{{ url_for('categories.excluir', id=c.id) }}" onsubmit="return confirmarExclusao(this, 'Excluir a categoria {{ c.name }}?');">
+          <button type="submit" class="icon-btn danger">🗑️</button>
+        </form>
+      </div>
+      {% endfor %}
+    {% else %}
+      <div class="empty-state">Nenhuma categoria de despesa.</div>
+    {% endif %}
+  </div>
+</div>
+
+{% endblock %}

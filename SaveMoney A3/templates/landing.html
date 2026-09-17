@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SaveMoney — Organize suas finanças</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<script>
+  (function() {
+    const tema = localStorage.getItem("savemoney_theme") || "light";
+    document.documentElement.setAttribute("data-theme", tema);
+  })();
+</script>
+</head>
+<body>
+
+<div class="flash-container">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="flash flash-{{ category }}">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+</div>
+
+<div class="container">
+  <header class="landing-header">
+    <div class="logo">💰 SaveMoney</div>
+    <nav class="landing-nav">
+      <button class="theme-toggle" id="themeToggleBtn" onclick="alternarTema()">🌙 Escuro</button>
+      <a href="{{ url_for('auth.login') }}" class="btn btn-outline">Entrar</a>
+      <a href="{{ url_for('auth.register') }}" class="btn btn-primary">Criar conta</a>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <h1>Organize seu dinheiro.<br>Controle seus gastos.<br>Alcance seus objetivos.</h1>
+    <p>O SaveMoney é um sistema simples de controle financeiro pessoal, feito para te ajudar a entender para onde vai o seu dinheiro e a planejar o futuro com clareza.</p>
+    <div class="hero-actions">
+      <a href="{{ url_for('auth.register') }}" class="btn btn-primary">Criar conta grátis</a>
+      <a href="{{ url_for('auth.login') }}" class="btn btn-outline">Já tenho conta</a>
+    </div>
+  </section>
+
+  <section class="features">
+    <div class="feature-card">
+      <div class="icon">💰</div>
+      <h3>Controle de receitas</h3>
+      <p>Registre todas as suas fontes de renda e acompanhe sua evolução mês a mês.</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon">💸</div>
+      <h3>Controle de despesas</h3>
+      <p>Organize seus gastos por categoria e entenda para onde seu dinheiro está indo.</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon">📊</div>
+      <h3>Dashboard financeiro</h3>
+      <p>Veja saldo, receitas, despesas e economia do mês em um só lugar.</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon">🎯</div>
+      <h3>Metas financeiras</h3>
+      <p>Defina objetivos e acompanhe o progresso até alcançá-los.</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon">📋</div>
+      <h3>Histórico de movimentações</h3>
+      <p>Consulte, filtre e pesquise todo o seu histórico financeiro facilmente.</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon">📈</div>
+      <h3>Gráficos</h3>
+      <p>Visualize receitas x despesas e gastos por categoria em gráficos simples.</p>
+    </div>
+  </section>
+</div>
+
+<footer class="landing-footer">
+  © SaveMoney — Projeto universitário de controle de finanças pessoais.
+</footer>
+
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

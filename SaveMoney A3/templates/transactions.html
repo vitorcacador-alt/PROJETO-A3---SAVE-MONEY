@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}Transações — SaveMoney{% endblock %}
+{% block page_title %}Histórico de Transações{% endblock %}
+
+{% block content %}
+
+<div class="panel">
+  <div class="panel-header">
+    <h2>Todas as movimentações</h2>
+  </div>
+
+  <form method="GET" class="filters-bar">
+    <select name="tipo" class="form-control">
+      <option value="todas" {{ 'selected' if filtros.tipo == 'todas' }}>Todas</option>
+      <option value="receita" {{ 'selected' if filtros.tipo == 'receita' }}>Receitas</option>
+      <option value="despesa" {{ 'selected' if filtros.tipo == 'despesa' }}>Despesas</option>
+    </select>
+    <input type="text" name="busca" class="form-control" placeholder="Pesquisar descrição..." value="{{ filtros.busca }}">
+    <input type="date" name="data_inicio" class="form-control" value="{{ filtros.data_inicio }}">
+    <input type="date" name="data_fim" class="form-control" value="{{ filtros.data_fim }}">
+    <select name="categoria" class="form-control">
+      <option value="">Todas as categorias</option>
+      {% for c in categorias %}
+        <option value="{{ c.name }}" {{ 'selected' if filtros.categoria == c.name }}>{{ c.name }}</option>
+      {% endfor %}
+    </select>
+    <button type="submit" class="btn btn-secondary">Filtrar</button>
+    <a href="{{ url_for('transactions.historico') }}" class="btn btn-secondary">Limpar</a>
+  </form>
+
+  <div class="table-wrapper">
+    {% if itens %}
+    <table>
+      <thead>
+        <tr><th>Data</th><th>Descrição</th><th>Categoria</th><th>Tipo</th><th>Valor</th><th>Ações</th></tr>
+      </thead>
+      <tbody>
+        {% for t in itens %}
+        <tr>
+          <td>{{ t.date.strftime('%d/%m/%Y') }}</td>
+          <td>{{ t.description }}</td>
+          <td>{{ t.category or '-' }}</td>
+          <td>
+            {% if t.type == 'receita' %}
+              <span class="badge badge-receita">Receita</span>
+            {% else %}
+              <span class="badge badge-despesa">Despesa</span>
+            {% endif %}
+          </td>
+          <td class="{{ 'amount-receita' if t.type == 'receita' else 'amount-despesa' }}">
+            {{ '+' if t.type == 'receita' else '−' }} R$ {{ "%.2f"|format(t.amount)|replace('.', ',') }}
+          </td>
+          <td class="actions-cell">
+            {% if t.type == 'receita' %}
+              <a href="{{ url_for('transactions.receitas') }}" class="icon-btn edit">✏️</a>
+            {% else %}
+              <a href="{{ url_for('transactions.despesas') }}" class="icon-btn edit">✏️</a>
+            {% endif %}
+            <form method="POST" action="{{ url_for('transactions.excluir_transacao', id=t.id) }}" onsubmit="return confirmarExclusao(this, 'Tem certeza que deseja excluir esta movimentação?');">
+              <button type="submit" class="icon-btn danger">🗑️</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">Nenhuma movimentação encontrada para os filtros selecionados.</div>
+    {% endif %}
+  </div>
+</div>
+
+{% endblock %}
