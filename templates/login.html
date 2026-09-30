@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Entrar — SaveMoney</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<script>
+  (function() {
+    const tema = localStorage.getItem("savemoney_theme") || "light";
+    document.documentElement.setAttribute("data-theme", tema);
+  })();
+</script>
+</head>
+<body>
+
+<div class="flash-container">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="flash flash-{{ category }}">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+</div>
+
+<div class="auth-wrapper">
+  <div class="auth-card">
+    <div class="logo" style="justify-content:center; margin-bottom: 14px;">💰 SaveMoney</div>
+    <h2>Entrar</h2>
+    <p class="subtitle">Acesse sua conta para continuar.</p>
+
+    <form method="POST" action="{{ url_for('auth.login') }}">
+      <div class="form-group">
+        <label for="email">E-mail</label>
+        <input type="email" id="email" name="email" class="form-control" value="{{ email or '' }}" required>
+      </div>
+      <div class="form-group">
+        <label for="password">Senha</label>
+        <input type="password" id="password" name="password" class="form-control" required>
+      </div>
+      <button type="submit" class="btn btn-primary btn-block">Entrar</button>
+    </form>
+
+    <div class="auth-links">
+      <a href="{{ url_for('auth.forgot_password') }}">Esqueci minha senha</a>
+    <div class="auth-links">
+      Não tem conta? <a href="{{ url_for('auth.register') }}" style="color: var(--primary); font-weight:600;">Criar conta</a>
+    </div>
+    <div class="auth-demo">
+      <a href="{{ url_for('auth.demo_login') }}" style="color: var(--text-muted);">Entrar com conta de demonstração</a>
+    </div>
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
