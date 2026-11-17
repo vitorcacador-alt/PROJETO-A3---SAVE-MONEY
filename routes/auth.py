@@ -3,7 +3,7 @@ from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from extensions import db
-from models import User
+from models import User, Subscription
 from helpers import criar_categorias_padrao, criar_dados_demo
 from email_utils import (
     enviar_email_redefinicao,
@@ -41,7 +41,17 @@ def register():
                 flash(e, "danger")
             return render_template("register.html", name=name, email=email)
 
-        user = User(name=name, email=email, password=generate_password_hash(password))
+        user = User(
+            name=name,
+            email=email,
+            password=generate_password_hash(password)
+        )
+
+        user.subscription = Subscription(
+            plan="free",
+            status="active"
+        )
+
         db.session.add(user)
         db.session.commit()
 

@@ -1,0 +1,170 @@
+
+{% extends "base.html" %}
+
+{% block title %}Planos | SaveMoney{% endblock %}
+{% block page_title %}Conheça nossos planos{% endblock %}
+
+{% block content %}
+<style>
+    .plans-intro {
+        text-align: center;
+        margin: 30px auto;
+        max-width: 650px;
+    }
+
+    .plans-intro p {
+        color: var(--text-muted);
+        line-height: 1.6;
+    }
+
+    .plans-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 20px;
+        align-items: stretch;
+        max-width: 850px;
+        margin: 30px auto;
+    }
+
+    .plan-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 26px;
+        box-shadow: var(--shadow);
+        display: flex;
+        flex-direction: column;
+    }
+
+    .plan-card.highlight {
+        border: 2px solid var(--primary);
+        transform: translateY(-8px);
+    }
+
+    .plan-card.current-plan {
+        border: 2px solid #16a34a;
+    }
+
+    .plan-card h2 {
+        margin: 0 0 10px;
+    }
+
+    .plan-price {
+        font-size: 2rem;
+        font-weight: 800;
+        margin: 15px 0 0;
+    }
+
+    .plan-period {
+        color: var(--text-muted);
+        font-size: .85rem;
+    }
+
+    .plan-description {
+        color: var(--text-muted);
+        min-height: 45px;
+        line-height: 1.5;
+    }
+
+    .plan-features {
+        margin: 22px 0;
+        flex: 1;
+    }
+
+    .plan-features li {
+        padding: 9px 0;
+        border-bottom: 1px solid var(--border);
+        font-size: .9rem;
+    }
+
+    .plan-status {
+        color: var(--text-muted);
+        font-size: .8rem;
+        margin-top: 12px;
+        text-align: center;
+    }
+
+    .current-plan-label {
+        background: #dcfce7;
+        color: #166534;
+        padding: 7px 12px;
+        border-radius: 20px;
+        font-size: .8rem;
+        font-weight: 700;
+        text-align: center;
+        margin-bottom: 15px;
+    }
+
+    @media (max-width: 700px) {
+        .plans-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .plan-card.highlight {
+            transform: none;
+        }
+    }
+</style>
+
+<div class="plans-intro">
+    <h2>Escolha o plano ideal para você</h2>
+    <p>
+        Comece gratuitamente e conheça as ferramentas do SaveMoney.
+        Quando precisar de mais recursos, você poderá evoluir seu plano.
+    </p>
+</div>
+
+<div class="plans-grid">
+    {% for plano in planos if plano.slug in ["free", "pro"] %}
+    <div class="plan-card
+        {{ 'highlight' if plano.highlight else '' }}
+        {{ 'current-plan' if plano.slug == plano_atual else '' }}">
+
+        {% if plano.slug == plano_atual %}
+            <div class="current-plan-label">✓ Seu plano atual</div>
+        {% elif plano.highlight %}
+            <span class="badge badge-receita">Mais popular</span>
+        {% endif %}
+
+        <h2>{{ plano.name }}</h2>
+
+        <p class="plan-description">{{ plano.description }}</p>
+
+        <div class="plan-price">{{ plano.price }}</div>
+        <span class="plan-period">{{ plano.period }}</span>
+
+        <ul class="plan-features">
+            {% for feature in plano.features %}
+                <li>✓ {{ feature }}</li>
+            {% endfor %}
+        </ul>
+
+        {% if plano.slug == plano_atual %}
+
+            <button class="btn btn-secondary btn-block" disabled>
+                Plano atual
+            </button>
+
+        {% elif plano.slug == "free" %}
+
+            <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-block">
+                Começar grátis
+            </a>
+
+        {% else %}
+
+            <a href="{{ url_for('subscriptions.payment_demo', plano=plano.slug) }}"
+               class="btn btn-primary btn-block">
+                Assinar {{ plano.name }}
+            </a>
+
+            <p class="plan-status">Pagamento demonstrativo</p>
+
+        {% endif %}
+
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
+
+

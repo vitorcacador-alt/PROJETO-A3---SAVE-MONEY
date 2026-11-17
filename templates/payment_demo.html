@@ -1,0 +1,123 @@
+
+{% extends "base.html" %}
+
+{% block title %}Pagamento | SaveMoney{% endblock %}
+{% block page_title %}Finalizar assinatura{% endblock %}
+
+{% block content %}
+
+<style>
+    .payment-container {
+        max-width: 650px;
+        margin: 40px auto;
+    }
+
+    .payment-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 32px;
+        box-shadow: var(--shadow);
+        text-align: center;
+    }
+
+    .payment-icon {
+        font-size: 3rem;
+        margin-bottom: 15px;
+    }
+
+    .payment-card h2 {
+        margin-bottom: 10px;
+    }
+
+    .payment-description {
+        color: var(--text-muted);
+        line-height: 1.6;
+    }
+
+    .payment-plan {
+        background: var(--background);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 22px;
+        margin: 25px 0;
+    }
+
+    .payment-price {
+        font-size: 2.2rem;
+        font-weight: 800;
+        margin: 12px 0 0;
+    }
+
+    .payment-period {
+        color: var(--text-muted);
+        font-size: .9rem;
+    }
+
+    .payment-notice {
+        background: var(--background);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 16px;
+        margin: 20px 0;
+        color: var(--text-muted);
+        line-height: 1.6;
+        font-size: .9rem;
+    }
+
+    .payment-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-top: 25px;
+    }
+</style>
+
+<div class="payment-container">
+    <div class="payment-card">
+
+        <div class="payment-icon">💳</div>
+
+        <h2>Quase lá!</h2>
+
+        <p class="payment-description">
+            Você escolheu um plano do SaveMoney.
+            Confira os detalhes da sua assinatura abaixo.
+        </p>
+
+        <div class="payment-plan">
+            <span style="color: var(--text-muted);">Plano selecionado</span>
+
+            <h2>{{ plano.name }}</h2>
+
+            <div class="payment-price">{{ plano.price }}</div>
+
+            <span class="payment-period">{{ plano.period }}</span>
+        </div>
+
+        <div class="payment-notice">
+            <strong>Pagamento demonstrativo</strong>
+            <p>
+                A contratação online ainda está em desenvolvimento.
+                Nenhuma cobrança será realizada nesta etapa.
+            </p>
+        </div>
+
+        <div class="payment-actions">
+            <form method="POST">
+                <button type="submit" class="btn btn-primary btn-block">
+                    Confirmar contratação
+                </button>
+            </form>
+
+            <a href="{{ url_for('subscriptions.plans') }}"
+               class="btn btn-secondary btn-block">
+                Voltar aos planos
+            </a>
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}
+

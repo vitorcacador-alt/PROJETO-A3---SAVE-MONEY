@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -29,6 +30,7 @@
     <div class="logo">💰 SaveMoney</div>
     <nav class="landing-nav">
       <button class="theme-toggle" id="themeToggleBtn" onclick="alternarTema()">🌙 Escuro</button>
+      <a href="{{ url_for('subscriptions.plans') }}" class="btn btn-outline">Planos</a>
       <a href="{{ url_for('auth.login') }}" class="btn btn-outline">Entrar</a>
       <a href="{{ url_for('auth.register') }}" class="btn btn-primary">Criar conta</a>
     </nav>
@@ -39,6 +41,7 @@
     <p>O SaveMoney é um sistema simples de controle financeiro pessoal, feito para te ajudar a entender para onde vai o seu dinheiro e a planejar o futuro com clareza.</p>
     <div class="hero-actions">
       <a href="{{ url_for('auth.register') }}" class="btn btn-primary">Criar conta grátis</a>
+      <a href="{{ url_for('subscriptions.plans') }}" class="btn btn-outline">Conhecer planos</a>
       <a href="{{ url_for('auth.login') }}" class="btn btn-outline">Já tenho conta</a>
     </div>
   </section>

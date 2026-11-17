@@ -1,6 +1,6 @@
+
 import os
 from flask import Flask
-from flask_login import login_required
 
 from config import Config
 from extensions import db, login_manager
@@ -12,7 +12,10 @@ def create_app():
     app.config.from_object(Config)
 
     # Garante que a pasta do banco de dados exista
-    os.makedirs(os.path.join(os.path.dirname(__file__), "database"), exist_ok=True)
+    os.makedirs(
+        os.path.join(os.path.dirname(__file__), "database"),
+        exist_ok=True
+    )
 
     db.init_app(app)
     login_manager.init_app(app)
@@ -30,6 +33,8 @@ def create_app():
     from routes.goals import goals_bp
     from routes.planning import planning_bp
     from routes.profile import profile_bp
+    from routes.subscriptions import subscriptions_bp
+    from routes.reports import reports_bp
 
     app.register_blueprint(main_bp)
     app.register_blueprint(auth_bp)
@@ -39,6 +44,8 @@ def create_app():
     app.register_blueprint(goals_bp)
     app.register_blueprint(planning_bp)
     app.register_blueprint(profile_bp)
+    app.register_blueprint(subscriptions_bp)
+    app.register_blueprint(reports_bp)
 
     with app.app_context():
         db.create_all()

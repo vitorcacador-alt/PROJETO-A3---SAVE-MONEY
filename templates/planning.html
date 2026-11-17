@@ -1,3 +1,4 @@
+
 {% extends "base.html" %}
 {% block title %}Planejamento — SaveMoney{% endblock %}
 {% block page_title %}Planejamento Mensal{% endblock %}
@@ -10,18 +11,23 @@
 </div>
 {% endif %}
 
+<!-- PLANEJAMENTO BÁSICO -->
 <div class="planning-grid">
   <div class="stat-card">
     <div class="label">Receita prevista</div>
     <div class="value positive">R$ {{ "%.2f"|format(plano.expected_income)|replace('.', ',') }}</div>
   </div>
+
   <div class="stat-card">
     <div class="label">Despesas previstas</div>
     <div class="value negative">R$ {{ "%.2f"|format(plano.expected_expense)|replace('.', ',') }}</div>
   </div>
+
   <div class="stat-card">
     <div class="label">Valor disponível (previsto)</div>
-    <div class="value {{ 'positive' if disponivel_previsto >= 0 else 'negative' }}">R$ {{ "%.2f"|format(disponivel_previsto)|replace('.', ',') }}</div>
+    <div class="value {{ 'positive' if disponivel_previsto >= 0 else 'negative' }}">
+      R$ {{ "%.2f"|format(disponivel_previsto)|replace('.', ',') }}
+    </div>
   </div>
 </div>
 
@@ -30,35 +36,143 @@
     <div class="label">Limite mensal de gastos</div>
     <div class="value">R$ {{ "%.2f"|format(plano.monthly_limit)|replace('.', ',') }}</div>
   </div>
+
   <div class="stat-card">
     <div class="label">Gasto atual do mês</div>
     <div class="value negative">R$ {{ "%.2f"|format(gasto_atual)|replace('.', ',') }}</div>
   </div>
+
   <div class="stat-card">
     <div class="label">Disponível dentro do limite</div>
-    <div class="value {{ 'positive' if disponivel_limite >= 0 else 'negative' }}">R$ {{ "%.2f"|format(disponivel_limite)|replace('.', ',') }}</div>
+    <div class="value {{ 'positive' if disponivel_limite >= 0 else 'negative' }}">
+      R$ {{ "%.2f"|format(disponivel_limite)|replace('.', ',') }}
+    </div>
   </div>
 </div>
 
+
+<!-- PLANEJAMENTO AVANÇADO -->
+{% if tem_planejamento_avancado %}
+
 <div class="panel">
-  <div class="panel-header"><h2>Definir planejamento</h2></div>
+  <div class="panel-header">
+    <h2>Planejamento avançado</h2>
+  </div>
+
+  <p style="margin-bottom: 20px; opacity: 0.75;">
+    Acompanhe o ritmo dos seus gastos e tenha uma previsão financeira para o restante do mês.
+  </p>
+
+  <div class="planning-grid">
+
+    <div class="stat-card">
+      <div class="label">Média diária de gastos</div>
+      <div class="value">
+        R$ {{ "%.2f"|format(media_diaria)|replace('.', ',') }}
+      </div>
+      <p style="font-size: 12px; opacity: 0.7; margin-top: 8px;">
+        Média de despesas por dia neste mês.
+      </p>
+    </div>
+
+    <div class="stat-card">
+      <div class="label">Projeção de gastos do mês</div>
+      <div class="value negative">
+        R$ {{ "%.2f"|format(projecao_mensal)|replace('.', ',') }}
+      </div>
+      <p style="font-size: 12px; opacity: 0.7; margin-top: 8px;">
+        Estimativa baseada no ritmo atual de gastos.
+      </p>
+    </div>
+
+    <div class="stat-card">
+      <div class="label">Limite mensal utilizado</div>
+      <div class="value {{ 'negative' if percentual_limite >= 100 else 'positive' }}">
+        {{ "%.1f"|format(percentual_limite)|replace('.', ',') }}%
+      </div>
+      <p style="font-size: 12px; opacity: 0.7; margin-top: 8px;">
+        Percentual do orçamento mensal consumido.
+      </p>
+    </div>
+
+  </div>
+
+  {% if plano.monthly_limit > 0 %}
+  <div style="margin-top: 20px;">
+    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+      <strong>Uso do limite mensal</strong>
+      <span>{{ "%.1f"|format(percentual_limite)|replace('.', ',') }}%</span>
+    </div>
+
+    <div style="height: 10px; background: var(--border-color, #e5e7eb); border-radius: 20px; overflow: hidden;">
+      <div style="
+        height: 100%;
+        width: {{ [percentual_limite, 100]|min }}%;
+        background: {{ '#dc3545' if percentual_limite >= 100 else '#198754' }};
+        border-radius: 20px;
+        transition: width 0.3s ease;
+      "></div>
+    </div>
+  </div>
+  {% endif %}
+</div>
+
+{% else %}
+
+<div class="panel">
+  <div class="panel-header">
+    <h2>Planejamento avançado</h2>
+  </div>
+
+  <div class="empty-state">
+    <h3 style="margin-bottom: 10px;">
+      Desbloqueie seu planejamento avançado!
+    </h3>
+
+    <p style="margin-bottom: 18px;">
+      Tenha acesso à média diária de gastos, projeções mensais
+      e acompanhamento percentual do seu limite.
+      Disponível nos planos Pro e Business.
+    </p>
+
+    <a href="{{ url_for('subscriptions.plans') }}" class="btn btn-primary">
+      Conhecer planos
+    </a>
+  </div>
+</div>
+
+{% endif %}
+
+
+<!-- DEFINIR PLANEJAMENTO -->
+<div class="panel">
+  <div class="panel-header">
+    <h2>Definir planejamento</h2>
+  </div>
+
   <form method="POST" action="{{ url_for('planning.index') }}">
     <div class="form-row">
       <div class="form-group">
         <label>Receita prevista (R$)</label>
         <input type="text" name="expected_income" class="form-control" value="{{ plano.expected_income }}" required>
       </div>
+
       <div class="form-group">
         <label>Despesas previstas (R$)</label>
         <input type="text" name="expected_expense" class="form-control" value="{{ plano.expected_expense }}" required>
       </div>
+
       <div class="form-group">
         <label>Limite mensal de gastos (R$)</label>
         <input type="text" name="monthly_limit" class="form-control" value="{{ plano.monthly_limit }}" required>
       </div>
     </div>
-    <button type="submit" class="btn btn-primary">Salvar planejamento</button>
+
+    <button type="submit" class="btn btn-primary">
+      Salvar planejamento
+    </button>
   </form>
 </div>
 
 {% endblock %}
+

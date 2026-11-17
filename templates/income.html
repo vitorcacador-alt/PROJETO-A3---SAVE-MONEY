@@ -1,28 +1,34 @@
+
 {% extends "base.html" %}
 {% block title %}Receitas — SaveMoney{% endblock %}
 {% block page_title %}Receitas{% endblock %}
 
 {% block content %}
 
+<!-- NOVA RECEITA -->
 <div class="panel">
   <div class="panel-header">
     <h2>Nova receita</h2>
   </div>
+
   <form method="POST" action="{{ url_for('transactions.nova_receita') }}">
     <div class="form-row">
       <div class="form-group" style="flex:2;">
         <label>Descrição</label>
         <input type="text" name="description" class="form-control" required>
       </div>
+
       <div class="form-group">
         <label>Valor (R$)</label>
         <input type="text" name="amount" class="form-control" placeholder="0,00" required>
       </div>
+
       <div class="form-group">
         <label>Data</label>
         <input type="date" name="date" class="form-control" required>
       </div>
     </div>
+
     <div class="form-row">
       <div class="form-group">
         <label>Categoria</label>
@@ -32,19 +38,171 @@
           {% endfor %}
         </select>
       </div>
+
       <div class="form-group">
         <label>Forma de recebimento</label>
         <input type="text" name="payment_method" class="form-control" placeholder="Ex: Transferência, Dinheiro...">
       </div>
+
       <div class="form-group" style="flex:2;">
         <label>Observação</label>
         <input type="text" name="observation" class="form-control" placeholder="Opcional">
       </div>
     </div>
+
     <button type="submit" class="btn btn-primary">+ Adicionar receita</button>
   </form>
 </div>
 
+
+<!-- RECEITAS RECORRENTES -->
+{% if tem_acesso_recorrencias %}
+<div class="panel">
+  <div class="panel-header">
+    <h2>Receitas recorrentes</h2>
+  </div>
+
+  <p style="margin-bottom: 18px; opacity: 0.75;">
+    Cadastre receitas que acontecem todo mês, como salário ou pagamentos fixos.
+    O SaveMoney lançará cada recebimento automaticamente.
+  </p>
+
+  <form method="POST" action="{{ url_for('transactions.nova_receita_recorrente') }}">
+    <div class="form-row">
+      <div class="form-group" style="flex:2;">
+        <label>Descrição</label>
+        <input type="text" name="description" class="form-control" placeholder="Ex: Salário" required>
+      </div>
+
+      <div class="form-group">
+        <label>Valor mensal (R$)</label>
+        <input type="text" name="amount" class="form-control" placeholder="0,00" required>
+      </div>
+
+      <div class="form-group">
+        <label>Dia do recebimento</label>
+        <input type="number" name="day_of_month" class="form-control" min="1" max="31" placeholder="Ex: 5" required>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Categoria</label>
+        <select name="category" class="form-control">
+          {% for c in categorias %}
+            <option value="{{ c.name }}">{{ c.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Forma de recebimento</label>
+        <input type="text" name="payment_method" class="form-control" placeholder="Ex: Pix, transferência...">
+      </div>
+
+      <div class="form-group">
+        <label>Início da recorrência</label>
+        <input type="date" name="start_date" class="form-control" required>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Observação</label>
+      <input type="text" name="observation" class="form-control" placeholder="Opcional">
+    </div>
+
+    <button type="submit" class="btn btn-primary">+ Cadastrar receita fixa</button>
+  </form>
+
+  <div style="margin-top: 25px;">
+    <h3 style="margin-bottom: 15px;">Minhas receitas fixas</h3>
+
+    {% if recorrencias %}
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Descrição</th>
+              <th>Valor</th>
+              <th>Dia</th>
+              <th>Início</th>
+              <th>Status</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {% for r in recorrencias %}
+              <tr>
+                <td>{{ r.description }}</td>
+
+                <td class="amount-receita">
+                  R$ {{ "%.2f"|format(r.amount)|replace('.', ',') }}
+                </td>
+
+                <td>Todo dia {{ r.day_of_month }}</td>
+
+                <td>{{ r.start_date.strftime('%d/%m/%Y') }}</td>
+
+                <td>
+                  {% if r.active %}
+                    <span class="badge badge-receita">Ativa</span>
+                  {% else %}
+                    <span class="badge">Pausada</span>
+                  {% endif %}
+                </td>
+
+                <td class="actions-cell">
+                  <form method="POST" action="{{ url_for('transactions.alternar_receita_recorrente', id=r.id) }}">
+                    <button type="submit" class="btn btn-secondary">
+                      {% if r.active %}Pausar{% else %}Reativar{% endif %}
+                    </button>
+                  </form>
+
+                  <form method="POST" action="{{ url_for('transactions.excluir_receita_recorrente', id=r.id) }}"
+                        onsubmit="return confirm('Deseja excluir esta receita recorrente? Os lançamentos anteriores serão preservados.');">
+                    <button type="submit" class="icon-btn danger">🗑️</button>
+                  </form>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="empty-state">
+        Nenhuma receita recorrente cadastrada. Adicione seu salário ou outra receita fixa acima!
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+{% else %}
+<div class="panel">
+  <div class="panel-header">
+    <h2>Receitas recorrentes</h2>
+  </div>
+
+  <p style="margin-bottom: 18px; opacity: 0.75;">
+    Automatize seus lançamentos mensais cadastrando receitas como salário,
+    pagamentos fixos e outras entradas recorrentes.
+  </p>
+
+  <div class="empty-state">
+    <h3 style="margin-bottom: 10px;">Desbloqueie as receitas recorrentes!</h3>
+    <p style="margin-bottom: 18px;">
+      Esse recurso está disponível nos planos Pro e Business.
+      Faça o upgrade para automatizar seus recebimentos e economizar tempo.
+    </p>
+    <a href="{{ url_for('subscriptions.plans') }}" class="btn btn-primary">
+      Conhecer planos
+    </a>
+  </div>
+</div>
+{% endif %}
+
+
+<!-- MINHAS RECEITAS -->
 <div class="panel">
   <div class="panel-header">
     <h2>Minhas receitas</h2>
@@ -52,67 +210,112 @@
 
   <form method="GET" class="filters-bar">
     <input type="text" name="busca" class="form-control" placeholder="Pesquisar descrição..." value="{{ filtros.busca }}">
+
     <input type="date" name="data_inicio" class="form-control" value="{{ filtros.data_inicio }}">
+
     <input type="date" name="data_fim" class="form-control" value="{{ filtros.data_fim }}">
+
     <select name="categoria" class="form-control">
       <option value="">Todas as categorias</option>
       {% for c in categorias %}
-        <option value="{{ c.name }}" {{ 'selected' if filtros.categoria == c.name }}>{{ c.name }}</option>
+        <option value="{{ c.name }}" {% if filtros.categoria == c.name %}selected{% endif %}>
+          {{ c.name }}
+        </option>
       {% endfor %}
     </select>
+
     <button type="submit" class="btn btn-secondary">Filtrar</button>
     <a href="{{ url_for('transactions.receitas') }}" class="btn btn-secondary">Limpar</a>
   </form>
 
   <div class="table-wrapper">
     {% if itens %}
-    <table>
-      <thead>
-        <tr><th>Data</th><th>Descrição</th><th>Categoria</th><th>Forma</th><th>Valor</th><th>Ações</th></tr>
-      </thead>
-      <tbody>
-        {% for t in itens %}
-        <tr>
-          <td>{{ t.date.strftime('%d/%m/%Y') }}</td>
-          <td>{{ t.description }}{% if t.is_demo %} <span class="badge badge-receita">demo</span>{% endif %}</td>
-          <td>{{ t.category or '-' }}</td>
-          <td>{{ t.payment_method or '-' }}</td>
-          <td class="amount-receita">R$ {{ "%.2f"|format(t.amount)|replace('.', ',') }}</td>
-          <td class="actions-cell">
-            <button class="icon-btn edit" onclick='abrirEdicaoReceita({{ t.id }}, {{ t.description|tojson }}, {{ t.amount }}, {{ t.category|tojson }}, "{{ t.date.strftime('%Y-%m-%d') }}", {{ (t.payment_method or "")|tojson }}, {{ (t.observation or "")|tojson }})'>✏️</button>
-            <form method="POST" action="{{ url_for('transactions.excluir_receita', id=t.id) }}" onsubmit="return confirmarExclusao(this, 'Tem certeza que deseja excluir esta receita?');">
-              <button type="submit" class="icon-btn danger">🗑️</button>
-            </form>
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+      <table>
+        <thead>
+          <tr>
+            <th>Data</th>
+            <th>Descrição</th>
+            <th>Categoria</th>
+            <th>Forma</th>
+            <th>Valor</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for t in itens %}
+            <tr>
+              <td>{{ t.date.strftime('%d/%m/%Y') }}</td>
+
+              <td>
+                {{ t.description }}
+                {% if t.is_demo %}
+                  <span class="badge badge-receita">demo</span>
+                {% endif %}
+              </td>
+
+              <td>{{ t.category or '-' }}</td>
+              <td>{{ t.payment_method or '-' }}</td>
+
+              <td class="amount-receita">
+                R$ {{ "%.2f"|format(t.amount)|replace('.', ',') }}
+              </td>
+
+              <td class="actions-cell">
+                <button
+                  type="button"
+                  class="icon-btn edit edit-receita-btn"
+                  data-id="{{ t.id }}"
+                  data-description="{{ t.description }}"
+                  data-amount="{{ t.amount }}"
+                  data-category="{{ t.category or '' }}"
+                  data-date="{{ t.date.strftime('%Y-%m-%d') }}"
+                  data-payment="{{ t.payment_method or '' }}"
+                  data-observation="{{ t.observation or '' }}"
+                >✏️</button>
+
+                <form method="POST"
+                      action="{{ url_for('transactions.excluir_receita', id=t.id) }}"
+                      onsubmit="return confirmarExclusao(this, 'Tem certeza que deseja excluir esta receita?');">
+                  <button type="submit" class="icon-btn danger">🗑️</button>
+                </form>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
     {% else %}
-    <div class="empty-state">Nenhuma receita cadastrada ainda. Adicione sua primeira receita acima!</div>
+      <div class="empty-state">
+        Nenhuma receita cadastrada ainda. Adicione sua primeira receita acima!
+      </div>
     {% endif %}
   </div>
 </div>
 
-<!-- Modal de edição -->
+
+<!-- MODAL DE EDIÇÃO -->
 <div class="modal-overlay" id="editModal">
   <div class="modal-box" style="max-width: 480px;">
     <h3>Editar receita</h3>
+
     <form method="POST" id="editForm">
       <div class="form-group">
         <label>Descrição</label>
         <input type="text" name="description" id="edit_description" class="form-control" required>
       </div>
+
       <div class="form-row">
         <div class="form-group">
           <label>Valor (R$)</label>
           <input type="text" name="amount" id="edit_amount" class="form-control" required>
         </div>
+
         <div class="form-group">
           <label>Data</label>
           <input type="date" name="date" id="edit_date" class="form-control" required>
         </div>
       </div>
+
       <div class="form-group">
         <label>Categoria</label>
         <select name="category" id="edit_category" class="form-control">
@@ -121,14 +324,17 @@
           {% endfor %}
         </select>
       </div>
+
       <div class="form-group">
         <label>Forma de recebimento</label>
         <input type="text" name="payment_method" id="edit_payment_method" class="form-control">
       </div>
+
       <div class="form-group">
         <label>Observação</label>
         <input type="text" name="observation" id="edit_observation" class="form-control">
       </div>
+
       <div class="modal-actions">
         <button type="button" class="btn btn-secondary" onclick="fecharModalEdicao()">Cancelar</button>
         <button type="submit" class="btn btn-primary">Salvar alterações</button>
@@ -138,6 +344,7 @@
 </div>
 
 {% endblock %}
+
 
 {% block scripts %}
 <script>
@@ -151,8 +358,24 @@ function abrirEdicaoReceita(id, descricao, valor, categoria, data, forma, observ
   document.getElementById("edit_observation").value = observacao;
   document.getElementById("editModal").classList.add("active");
 }
+
 function fecharModalEdicao() {
   document.getElementById("editModal").classList.remove("active");
 }
+
+document.querySelectorAll(".edit-receita-btn").forEach(function(botao) {
+  botao.addEventListener("click", function() {
+    abrirEdicaoReceita(
+      this.dataset.id,
+      this.dataset.description,
+      this.dataset.amount,
+      this.dataset.category,
+      this.dataset.date,
+      this.dataset.payment,
+      this.dataset.observation
+    );
+  });
+});
 </script>
 {% endblock %}
+
